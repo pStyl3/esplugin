@@ -225,6 +225,10 @@ impl Plugin {
         }
     }
 
+    pub fn is_medium_plugin(&self) -> bool {
+        self.is_medium_flag_set()
+    }
+
     pub fn is_override_plugin(&self) -> bool {
         // The override flag is unset by the game if the plugin has no masters or
         // if the plugin's light flag is set.
@@ -392,6 +396,15 @@ impl Plugin {
         let flag = match self.game_id {
             GameId::Starfield => 0x100,
             GameId::SkyrimSE | GameId::Fallout4 => 0x200,
+            _ => return false,
+        };
+
+        self.data.header_record.header().flags() & flag != 0
+    }
+
+    fn is_medium_flag_set(&self) -> bool {
+        let flag = match self.game_id {
+            GameId::Starfield => 0x10000,
             _ => return false,
         };
 
@@ -757,6 +770,16 @@ mod tests {
         }
 
         #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
+        }
+
+        #[test]
         fn description_should_return_plugin_header_hedr_subrecord_content() {
             let mut plugin = Plugin::new(
                 GameId::Morrowind,
@@ -955,6 +978,16 @@ mod tests {
         }
 
         #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
+        }
+
+        #[test]
         fn header_version_should_return_plugin_header_hedr_subrecord_field() {
             let mut plugin = Plugin::new(
                 GameId::Oblivion,
@@ -1057,6 +1090,16 @@ mod tests {
             assert!(!plugin.is_light_plugin());
             let plugin = Plugin::new(GameId::Skyrim, Path::new("Blank.esl"));
             assert!(!plugin.is_light_plugin());
+        }
+
+        #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
         }
 
         #[test]
@@ -1336,6 +1379,16 @@ mod tests {
         }
 
         #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
+        }
+
+        #[test]
         fn header_version_should_return_plugin_header_hedr_subrecord_field() {
             let mut plugin = Plugin::new(
                 GameId::SkyrimSE,
@@ -1449,6 +1502,16 @@ mod tests {
         }
 
         #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
+        }
+
+        #[test]
         fn valid_light_form_id_range_should_be_empty() {
             let mut plugin = Plugin::new(
                 GameId::Fallout3,
@@ -1483,6 +1546,16 @@ mod tests {
             assert!(!plugin.is_light_plugin());
             let plugin = Plugin::new(GameId::FalloutNV, Path::new("Blank.esl"));
             assert!(!plugin.is_light_plugin());
+        }
+
+        #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
         }
 
         #[test]
@@ -1561,6 +1634,16 @@ mod tests {
         fn is_light_plugin_should_be_true_for_a_ghosted_esl_file() {
             let plugin = Plugin::new(GameId::Fallout4, Path::new("Blank.esl.ghost"));
             assert!(plugin.is_light_plugin());
+        }
+
+        #[test]
+        fn is_medium_plugin_should_be_false() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
         }
 
         #[test]
@@ -1693,6 +1776,30 @@ mod tests {
                 .1;
 
             assert!(plugin.is_light_plugin());
+        }
+
+        #[test]
+        fn is_medium_plugin_should_be_false_for_a_plugin_without_the_medium_flag_set() {
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esp"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esm"));
+            assert!(!plugin.is_medium_plugin());
+            let plugin = Plugin::new(GameId::Morrowind, Path::new("Blank.esl"));
+            assert!(!plugin.is_medium_plugin());
+        }
+
+        #[test]
+        fn is_medium_plugin_should_be_true_for_a_plugin_with_the_medium_flag_set() {
+            let mut plugin = Plugin::new(GameId::Starfield, Path::new("Blank.esm"));
+            let file_data = &[
+                0x54, 0x45, 0x53, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xB2, 0x2E, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ];
+            plugin.data.header_record = Record::parse(file_data, GameId::Starfield, false)
+                .unwrap()
+                .1;
+
+            assert!(plugin.is_medium_plugin());
         }
 
         #[test]
